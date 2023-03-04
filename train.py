@@ -10,7 +10,7 @@ train_dataset = load_from_disk('train.hf')
 eval_dataset = load_from_disk('test.hf')
 
 
-label_list = ['I-question','I-answer','I-header','O-other']
+label_list = ['I-question','I-answer','I-header','B-other']
 
 id2label = {k: v for k,v in enumerate(label_list)}
 label2id = {v: k for k,v in enumerate(label_list)}
