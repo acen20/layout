@@ -1,6 +1,7 @@
 import argparse
 import json
 import os
+import pandas as pd
 
 from PIL import Image
 from transformers import AutoTokenizer
@@ -200,6 +201,14 @@ def seg(model_name_or_path, output_dir, data_split, max_len):
         max_len,
     )
 
+def create_labels_file(output_dir):
+    df = pd.read_csv(f"{output_dir}/train.txt", delimiter="\t")
+    labels = df.iloc[:, 1].value_counts().index.tolist()
+    with open(f"{output_dir}/labels.txt", 'w') as f:
+        for label in labels:
+            f.write(label+'\n')
+
+
 def preprocess_data(data_dir, 
                     data_split,
                     output_dir,
@@ -207,6 +216,8 @@ def preprocess_data(data_dir,
                     max_len):
     convert(data_dir, output_dir, data_split)
     seg(model_name_or_path, output_dir, data_split, max_len)
+    if data_split == "train":
+        create_labels_file(output_dir)
 
 if __name__ == "__main__":
     preprocess_data(data_dir="dataset/training_data/annotations",

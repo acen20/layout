@@ -3,6 +3,8 @@ from datasets import load_from_disk
 # Load the microsoft/layoutlmv3-base processor from the Hugging Face hub
 from transformers import AutoProcessor
 
+from dataset_loader import DatasetLoader
+
 processor = AutoProcessor.from_pretrained("microsoft/layoutlmv3-base", apply_ocr=False)
 
 
