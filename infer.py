@@ -103,7 +103,7 @@ def convert_example_to_features(image, words, boxes, actual_boxes, tokenizer, ar
           token_actual_boxes.extend([actual_bbox] * len(word_tokens))
 
       # Truncation: account for [CLS] and [SEP] with "- 2". 
-      special_tokens_count = 2 
+      special_tokens_count = 2
       if len(tokens) > args.max_seq_length - special_tokens_count:
           tokens = tokens[: (args.max_seq_length - special_tokens_count)]
           token_boxes = token_boxes[: (args.max_seq_length - special_tokens_count)]
@@ -166,6 +166,8 @@ print(bbox.shape)
 
 model = LayoutLMv3ForTokenClassification.from_pretrained(args.model_name_or_path)
 model.to(device)
+
+print(model)
 
 model.eval()
 

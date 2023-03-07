@@ -59,6 +59,8 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 model = LayoutLMv3ForTokenClassification.from_pretrained("microsoft/layoutlmv3-base", num_labels=num_labels)
 model.to(device)
+
+print(model)
      
 from transformers import AdamW
 from tqdm import tqdm

@@ -223,5 +223,5 @@ if __name__ == "__main__":
     preprocess_data(data_dir="dataset/testing_data/annotations",
                     data_split="test",
                     output_dir="output_data",
-                    model_name_or_path="microsoft/layoutlm-base-cased",
-                    max_len=512)
+                    model_name_or_path="microsoft/layoutlmv3-base",
+                    max_len=510)
