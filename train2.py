@@ -1,4 +1,4 @@
-from transformers import LayoutLMTokenizer
+from transformers import LayoutLMv3Tokenizer
 from dataset_loader import DatasetLoader, InputFeatures
 from torch.nn import CrossEntropyLoss
 from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
@@ -21,9 +21,9 @@ pad_token_label_id = CrossEntropyLoss().ignore_index
 args = {'local_rank': -1,
         'overwrite_cache': True,
         'data_dir': 'output_data',
-        'model_name_or_path':'microsoft/layoutlm-base-uncased',
+        'model_name_or_path':'microsoft/layoutlmv3-base',
         'max_seq_length': 512,
-        'model_type': 'layoutlm',}
+        'model_type': 'layoutlmv3',}
 
 # class to turn the keys of a dict into attributes (thanks Stackoverflow)
 class AttrDict(dict):
@@ -33,7 +33,8 @@ class AttrDict(dict):
 
 args = AttrDict(args)
 
-tokenizer = LayoutLMTokenizer.from_pretrained("microsoft/layoutlm-base-uncased")
+
+tokenizer = LayoutLMv3Tokenizer.from_pretrained("microsoft/layoutlmv3-base")
 
 # the LayoutLM authors already defined a specific FunsdDataset, so we are going to use this here
 train_dataset = DatasetLoader(args, tokenizer, labels, pad_token_label_id, mode="train")
@@ -51,12 +52,12 @@ eval_dataloader = DataLoader(eval_dataset,
 
 
 
-from transformers import LayoutLMForTokenClassification
+from transformers import LayoutLMv3ForTokenClassification
 import torch
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-model = LayoutLMForTokenClassification.from_pretrained("microsoft/layoutlm-base-uncased", num_labels=num_labels)
+model = LayoutLMv3ForTokenClassification.from_pretrained("microsoft/layoutlmv3-base", num_labels=num_labels)
 model.to(device)
      
 from transformers import AdamW
