@@ -7,11 +7,23 @@ from PIL import Image
 from transformers import AutoProcessor
 from datasets import Features, Sequence, ClassLabel, Value, Array2D, Array3D
 from datasets import Dataset
+from text_to_iob import text_to_iob
 
 image_column_name = "image"
 text_column_name = "tokens"
 boxes_column_name = "boxes"
 label_column_name = "labels"
+
+
+funsd_labels = {
+	'I-question':0,
+	'B-question':1,
+	'I-answer':2,
+	'B-answer':3,
+	'I-header':4,
+	'B-header':5,
+	'O':6
+}
 
 
 ## PREPARING THE EXAMPLES FOR TRAINING
@@ -37,12 +49,7 @@ for data_type in ['train','test']:
 	ALL_LABELS = []
 	LAYOUT_ANNOTATIONS = []
 
-	funsd_labels = {
-		'question':0,
-		'answer':1,
-		'header':2,
-		'other':3
-	}
+	
 
 	## Read files
 	for annotation_file in tqdm.tqdm(annotation_files):
@@ -61,10 +68,14 @@ for data_type in ['train','test']:
 
 		obj = {}
 		for annotation in annotations:
-			BBOXES.append(annotation['box'])
-			TOKENS.append(annotation['text'])
-			LABELS.append(funsd_labels[annotation['label']])
-			IDS.append(annotation['id'])
+			text = annotation['text']
+			words = annotation['words']
+			for word in words:
+				BBOXES.append(word['box'])
+				TOKENS.append(word['text'])
+				label = annotation['label']
+				LABELS.append(funsd_labels[annotation['label']])
+				IDS.append(annotation['id'])
 
 		ALL_LABELS.extend(LABELS)
 		obj['ids'] = IDS
