@@ -13,7 +13,8 @@ args = {'local_rank': -1,
         'model_name_or_path':'model',
         'max_seq_length': 512,
         'model_type': 'layoutlmv3',}
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+#device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+device = 'cpu'
 
 # class to turn the keys of a dict into attributes (thanks Stackoverflow)
 class AttrDict(dict):
@@ -163,7 +164,7 @@ bbox = torch.tensor(token_boxes, device=device).unsqueeze(0)
 print(bbox.shape)
 
 
-model = LayoutLMv3ForTokenClassification.from_pretrained(args.model_name_or_path, num_labels=num_labels)
+model = LayoutLMv3ForTokenClassification.from_pretrained(args.model_name_or_path)
 model.to(device)
 
 model.eval()

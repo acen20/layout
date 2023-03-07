@@ -66,7 +66,7 @@ from tqdm import tqdm
 optimizer = AdamW(model.parameters(), lr=5e-5)
 
 global_step = 0
-num_train_epochs = 5
+num_train_epochs = 1
 t_total = len(train_dataloader) * num_train_epochs # total number of training steps 
 
 #put the model in training mode
@@ -166,5 +166,5 @@ results = {
 }
 print(results)
 
-model.save_pretrained("model", from_pt = True)
+model.save_pretrained("model")
 tokenizer.save_pretrained("model")
