@@ -10,10 +10,21 @@ from transformers import LayoutLMv3ForTokenClassification
 args = {'local_rank': -1,
         'overwrite_cache': True,
         'data_dir': '/content/data',
-        'model_name_or_path':'microsoft/layoutlm-base-uncased',
-        'max_seq_length': 512,
-        'model_type': 'layoutlm',
+        'model_name_or_path':'microsoft/layoutlmv3-base',
+        'max_seq_length': 510,
+        'model_type': 'layoutlmv3',
 }
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+# class to turn the keys of a dict into attributes (thanks Stackoverflow)
+class AttrDict(dict):
+    def __init__(self, *args, **kwargs):
+        super(AttrDict, self).__init__(*args, **kwargs)
+        self.__dict__ = self
+
+args = AttrDict(args)
+
 
 
 def get_labels(path):
@@ -141,9 +152,6 @@ def convert_example_to_features(image, words, boxes, actual_boxes, tokenizer, ar
 tokenizer = LayoutLMv3Tokenizer.from_pretrained("microsoft/layoutlmv3-base")
 input_ids, input_mask, segment_ids, token_boxes, token_actual_boxes = convert_example_to_features(image=image, words=words, boxes=boxes, actual_boxes=actual_boxes, tokenizer=tokenizer, args=args)
 
-device='cuda'
-tokenizer.decode(input_ids)
-
 input_ids = torch.tensor(input_ids, device=device).unsqueeze(0)
 
 attention_mask = torch.tensor(input_mask, device=device).unsqueeze(0)
@@ -154,8 +162,12 @@ bbox = torch.tensor(token_boxes, device=device).unsqueeze(0)
 
 model = LayoutLMv3ForTokenClassification.from_pretrained("model", num_labels=num_labels)
 
+model.to(device)
 
-outputs = model(input_ids=input_ids, bbox=bbox, attention_mask=attention_mask, token_type_ids=token_type_ids)
+model.eval()
+
+with torch.no_grad():
+    outputs = model(input_ids=input_ids, bbox=bbox, attention_mask=attention_mask, token_type_ids=token_type_ids)
 
 token_predictions = outputs.logits.argmax(-1).squeeze().tolist() # the predictions are at the token level
 
