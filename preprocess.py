@@ -220,8 +220,8 @@ def preprocess_data(data_dir,
         create_labels_file(output_dir)
 
 if __name__ == "__main__":
-    preprocess_data(data_dir="dataset/training_data/annotations",
-                    data_split="train",
+    preprocess_data(data_dir="dataset/testing_data/annotations",
+                    data_split="test",
                     output_dir="output_data",
                     model_name_or_path="microsoft/layoutlm-base-cased",
                     max_len=512)
