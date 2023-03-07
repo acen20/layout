@@ -22,7 +22,6 @@ def normalize_bbox(bbox, size):
 
 
 class CustomDataset():
-    """Conll2003 dataset."""
 
     def get_line_bbox(self, bboxs):
         x = [bboxs[i][j] for i in range(len(bboxs)) for j in range(0, len(bboxs[i]), 2)]
@@ -80,6 +79,11 @@ def get_data(filepath):
     
     return data
 
-if __name__ == "__main__":
+'''if __name__ == "__main__":
     train = get_data("dataset/training_data")
     test = get_data("dataset/testing_data")
+    example = train[0]
+    words, boxes, ner_tags = example["tokens"], example["bboxes"], example["ner_tags"]
+    print(words)
+    print(boxes)
+    print(ner_tags)'''
