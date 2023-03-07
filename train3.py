@@ -165,12 +165,12 @@ model = LayoutLMv3ForTokenClassification.from_pretrained("microsoft/layoutlmv3-b
 from transformers import TrainingArguments, Trainer
 
 training_args = TrainingArguments(output_dir="test",
-                                  max_steps=1000,
+                                  max_steps=20,
                                   per_device_train_batch_size=1,
                                   per_device_eval_batch_size=1,
                                   learning_rate=1e-5,
                                   evaluation_strategy="steps",
-                                  eval_steps=100,
+                                  eval_steps=20,
                                   load_best_model_at_end=True,
                                   metric_for_best_model="f1")
 
@@ -197,8 +197,5 @@ trainer.train()
 
 trainer.evaluate()
 
-## INFERENCE
 
-from transformers import AutoModelForTokenClassification
-
-model = AutoModelForTokenClassification.from_pretrained("test/checkpoint-1000")
+trainer.save_model("model")
