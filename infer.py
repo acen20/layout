@@ -9,12 +9,10 @@ from transformers import LayoutLMv3ForTokenClassification
 
 args = {'local_rank': -1,
         'overwrite_cache': True,
-        'data_dir': '/content/data',
-        'model_name_or_path':'microsoft/layoutlmv3-base',
-        'max_seq_length': 510,
-        'model_type': 'layoutlmv3',
-}
-
+        'data_dir': 'output_data',
+        'model_name_or_path':'model',
+        'max_seq_length': 512,
+        'model_type': 'layoutlmv3',}
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # class to turn the keys of a dict into attributes (thanks Stackoverflow)
@@ -149,19 +147,23 @@ def convert_example_to_features(image, words, boxes, actual_boxes, tokenizer, ar
       
       return input_ids, input_mask, segment_ids, token_boxes, token_actual_boxes
      
-tokenizer = LayoutLMv3Tokenizer.from_pretrained("microsoft/layoutlmv3-base")
+tokenizer = LayoutLMv3Tokenizer.from_pretrained(args.model_name_or_path)
 input_ids, input_mask, segment_ids, token_boxes, token_actual_boxes = convert_example_to_features(image=image, words=words, boxes=boxes, actual_boxes=actual_boxes, tokenizer=tokenizer, args=args)
 
 input_ids = torch.tensor(input_ids, device=device).unsqueeze(0)
+print(input_ids.shape)
 
 attention_mask = torch.tensor(input_mask, device=device).unsqueeze(0)
+print(attention_mask.shape)
 
 token_type_ids = torch.tensor(segment_ids, device=device).unsqueeze(0)
+print(token_type_ids.shape)
 
 bbox = torch.tensor(token_boxes, device=device).unsqueeze(0)
+print(bbox.shape)
 
-model = LayoutLMv3ForTokenClassification.from_pretrained("model", num_labels=num_labels)
 
+model = LayoutLMv3ForTokenClassification.from_pretrained(args.model_name_or_path, num_labels=num_labels)
 model.to(device)
 
 model.eval()
@@ -208,4 +210,5 @@ for prediction, box in zip(word_level_predictions, final_boxes):
     draw.rectangle(box, outline=label2color[predicted_label])
     draw.text((box[0] + 10, box[1] - 10), text=predicted_label, fill=label2color[predicted_label], font=font)
 
+print("SAVING IMAGE")
 image.save("predictions.png")

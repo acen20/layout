@@ -167,3 +167,4 @@ results = {
 print(results)
 
 model.save_pretrained("model", from_pt = True)
+tokenizer.save_pretrained("model")
