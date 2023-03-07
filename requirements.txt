@@ -1,0 +1,5 @@
+pytesseract
+transformers
+datasets==2.10.1
+seqeval
+torch
