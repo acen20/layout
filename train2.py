@@ -73,6 +73,7 @@ t_total = len(train_dataloader) * num_train_epochs # total number of training st
 model.train()
 for epoch in range(num_train_epochs):
   for batch in tqdm(train_dataloader, desc="Training"):
+
       input_ids = batch[0].to(device)
       bbox = batch[4].to(device)
       attention_mask = batch[1].to(device)
