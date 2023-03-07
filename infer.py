@@ -1,11 +1,34 @@
 from PIL import Image
 
 import pytesseract
+import torch
 
 from transformers import LayoutLMv3Tokenizer
+from transformers import LayoutLMv3ForTokenClassification
+
+
+args = {'local_rank': -1,
+        'overwrite_cache': True,
+        'data_dir': '/content/data',
+        'model_name_or_path':'microsoft/layoutlm-base-uncased',
+        'max_seq_length': 512,
+        'model_type': 'layoutlm',
+}
+
+
+def get_labels(path):
+    with open(path, "r") as f:
+        labels = f.read().splitlines()
+    if "O" not in labels:
+        labels = ["O"] + labels
+    return labels
+
+labels = get_labels("output_data/labels.txt")
+
+num_labels = len(labels)
 
 #image = Image.open('/content/form_example.jpg')
-image = Image.open("/content/data/testing_data/images/83443897.png")
+image = Image.open("dataset/testing_data/images/82252956_2958.png")
 image = image.convert("RGB")
 
 import numpy as np
@@ -118,5 +141,59 @@ def convert_example_to_features(image, words, boxes, actual_boxes, tokenizer, ar
 tokenizer = LayoutLMv3Tokenizer.from_pretrained("microsoft/layoutlmv3-base")
 input_ids, input_mask, segment_ids, token_boxes, token_actual_boxes = convert_example_to_features(image=image, words=words, boxes=boxes, actual_boxes=actual_boxes, tokenizer=tokenizer, args=args)
 
-
+device='cuda'
 tokenizer.decode(input_ids)
+
+input_ids = torch.tensor(input_ids, device=device).unsqueeze(0)
+
+attention_mask = torch.tensor(input_mask, device=device).unsqueeze(0)
+
+token_type_ids = torch.tensor(segment_ids, device=device).unsqueeze(0)
+
+bbox = torch.tensor(token_boxes, device=device).unsqueeze(0)
+
+model = LayoutLMv3ForTokenClassification.from_pretrained("model", num_labels=num_labels)
+
+
+outputs = model(input_ids=input_ids, bbox=bbox, attention_mask=attention_mask, token_type_ids=token_type_ids)
+
+token_predictions = outputs.logits.argmax(-1).squeeze().tolist() # the predictions are at the token level
+
+word_level_predictions = [] # let's turn them into word level predictions
+final_boxes = []
+for id, token_pred, box in zip(input_ids.squeeze().tolist(), token_predictions, token_actual_boxes):
+  if (tokenizer.decode([id]).startswith("##")) or (id in [tokenizer.cls_token_id, 
+                                                           tokenizer.sep_token_id, 
+                                                          tokenizer.pad_token_id]):
+    # skip prediction + bounding box
+
+    continue
+  else:
+    word_level_predictions.append(token_pred)
+    final_boxes.append(box)
+
+# for id, prediction in zip(input_ids.squeeze().tolist(), predictions):
+#   if id != 0:
+#     print(tokenizer.decode([id]), label_map[prediction])
+print(word_level_predictions)
+
+from PIL import ImageDraw, ImageFont
+
+draw = ImageDraw.Draw(image)
+
+font = ImageFont.load_default()
+
+def iob_to_label(label):
+  if label != 'O':
+    return label[2:]
+  else:
+    return "other"
+
+label2color = {'question':'blue', 'answer':'green', 'header':'orange', 'other':'violet'}
+label_map = {i: label for i, label in enumerate(labels)}
+for prediction, box in zip(word_level_predictions, final_boxes):
+    predicted_label = iob_to_label(label_map[prediction]).lower()
+    draw.rectangle(box, outline=label2color[predicted_label])
+    draw.text((box[0] + 10, box[1] - 10), text=predicted_label, fill=label2color[predicted_label], font=font)
+
+image.save("predictions.png")

@@ -165,3 +165,5 @@ results = {
     "f1": f1_score(out_label_list, preds_list),
 }
 print(results)
+
+model.save_pretrained("model", from_pt = True)
