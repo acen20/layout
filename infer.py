@@ -62,7 +62,7 @@ def process_image(image):
     
     return image
 
-image = Image.open("dataset/testing_data/images/82491256.png").convert(mode="RGB")
+image = Image.open("sample.png").convert(mode="RGB")
 
 image = process_image(image)
 
